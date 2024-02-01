@@ -6,5 +6,7 @@ typedef struct{
 		char *symbols;
 }Base;
 
+extern Base *baseTable;
+
 #endif
 

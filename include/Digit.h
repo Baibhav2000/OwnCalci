@@ -2,7 +2,7 @@
 #define DIGIT_H
 
 struct Digit{
-	int digitVal;
+	char digitVal;
 	struct Digit *next;
 };
 

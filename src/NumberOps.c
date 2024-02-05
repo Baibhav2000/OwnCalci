@@ -7,7 +7,7 @@
 
 extern int maxBaseValue;
 
-Digit *addDigit(Digit *head, char ch){
+Digit *addDigit(Digit *head, char ch, char *location){
 	Digit *digit = (Digit*)malloc(sizeof(Digit));
 	digit->digitVal = ch;
 	digit->next = NULL;
@@ -17,11 +17,29 @@ Digit *addDigit(Digit *head, char ch){
 		return head;
 	}
 
-	Digit *tmp = head;
-	while(tmp->next)
-		tmp = tmp->next;
+	if(strcmp(location, "end") == 0){
+		Digit *tmp = head;
+		while(tmp->next)
+			tmp = tmp->next;
 
-	tmp->next = digit;
+		tmp->next = digit;
+	}
+	else if(strcmp(location, "begin") == 0){
+		digit->next = head;
+		head = digit;
+	}
+
+	return head;
+}
+
+Digit *deleteDigit(Digit *head){
+	if(!head)
+		return head;
+
+	Digit *tmp = head;
+	head = tmp->next;
+
+	free(tmp);
 
 	return head;
 }
@@ -57,7 +75,7 @@ Number createNumber(char *number_format){
 
 	char *ptr = tokens[1];
 	while(*ptr != '\0'){
-		num.sequenceHeader = addDigit(num.sequenceHeader, *ptr);
+		num.sequenceHeader = addDigit(num.sequenceHeader, *ptr, "end");
 		ptr++;
 	}
 
@@ -78,4 +96,12 @@ void printNumber(Number n){
 		tmp = tmp->next;
 	}
 	printf("\n");
+}
+
+void deallocateNumber(Number n){
+
+	Digit *head = n.sequenceHeader;
+	while(head){
+		head = deleteDigit(head);
+	}
 }

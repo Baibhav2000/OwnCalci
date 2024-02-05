@@ -36,7 +36,7 @@ $(BIN_NAME): $(OBJ_FILES)
 
 # Run the binary
 run: $(BIN_NAME)
-	./$(BIN_NAME)
+	cd $(BIN_DIR) && ./$(notdir $(BIN_NAME))
 
 # Clean up the generated files
 clean:

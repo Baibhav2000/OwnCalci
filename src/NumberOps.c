@@ -5,6 +5,8 @@
 #include "BaseOps.h"
 #include "NumberOps.h"
 
+extern int maxBaseValue;
+
 Digit *addDigit(Digit *head, char ch){
     Digit *digit = (Digit*)malloc(sizeof(Digit));
     digit->digitVal = ch;
@@ -41,6 +43,15 @@ Number createNumber(char *number_format){
         token = strtok(NULL, " ");
     }
 
+    if(atoi(tokens[0]) > maxBaseValue){
+        printf("ERROR : Given number beyond the maximum supported base (%d)\n",maxBaseValue);
+        free(tokens[0]);
+        free(tokens[1]);
+        free(tokens);
+        free(copy);
+        exit(0);
+    }
+
     num.base = atoi(tokens[0]);
     num.sequenceHeader = NULL;
 
@@ -53,8 +64,8 @@ Number createNumber(char *number_format){
     free(tokens[0]);
     free(tokens[1]);
     free(tokens);
-
     free(copy);
+
     return num;
 }
 

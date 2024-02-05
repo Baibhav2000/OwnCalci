@@ -3,6 +3,8 @@
 #include "BaseOps.h"
 #include "NumberOps.h"
 
+int maxBaseValue;
+
 int main(){
 	FILE *baseFile;
 
@@ -10,9 +12,9 @@ int main(){
 
 	baseFile = fopen(baseFileName, "r");
 
-	int maxBaseValue = initializeBase(baseFile);
+	maxBaseValue = initializeBase(baseFile);
 
-    Number num = createNumber("18 12ab3");
+    Number num = createNumber("21 12ab3");
 
     printNumber(num);
 

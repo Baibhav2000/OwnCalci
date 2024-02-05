@@ -4,7 +4,7 @@
 #include "Digit.h"
 
 typedef struct{
-		int base;
+		int base, digitCount;
 		Digit *sequenceHeader;
 }Number;
 

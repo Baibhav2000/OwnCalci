@@ -14,9 +14,9 @@ int main(){
 
 	maxBaseValue = initializeBase(baseFile);
 
-    Number num = createNumber("21 12ab3");
+	Number num = createNumber("21 12ab3");
 
-    printNumber(num);
+	printNumber(num);
 
 	fclose(baseFile);
 	free(baseTable);

@@ -1,10 +1,7 @@
 #ifndef NUMBER_H
 #define NUMBER_H
 
-typedef struct Digit{
-		char digitValue;
-		Digit *next;
-}Digit;
+#include "Digit.h"
 
 typedef struct{
 		int base;

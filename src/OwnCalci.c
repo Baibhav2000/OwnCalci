@@ -1,6 +1,7 @@
 #include <stdio.h>
-#include "BaseOps.h"
 #include <stdlib.h>
+#include "BaseOps.h"
+#include "NumberOps.h"
 
 int main(){
 	FILE *baseFile;
@@ -11,11 +12,9 @@ int main(){
 
 	int maxBaseValue = initializeBase(baseFile);
 
-	printf("Max. Base Value : %d\n",maxBaseValue);
+    Number num = createNumber("18 12ab3");
 
-	char symbol = 'g';
-
-	printf("Value of the symbol %c : %d\n",symbol, lookup(symbol));
+    printNumber(num);
 
 	fclose(baseFile);
 	free(baseTable);

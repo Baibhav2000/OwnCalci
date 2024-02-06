@@ -5,8 +5,6 @@
 
 int maxBaseValue;
 
-extern void deallocateNumber(Number n);
-
 int main(){
 	FILE *baseFile;
 
@@ -16,14 +14,16 @@ int main(){
 
 	maxBaseValue = initializeBase(baseFile);
 
-	Number num = createNumber("18 12ab3");
+	Number num1 = createNumber("16 73");
+    Number num2 = createNumber("8 7");
+    Number sum = add(num1, num2);
 
-	printNumber(num);
-    
+	printNumber(num1);
+	printNumber(num2);
+	printNumber(sum);
 
 	fclose(baseFile);
 	free(baseTable);
-    deallocateNumber(num);
 
 	return 0;
 }

@@ -7,8 +7,17 @@
 
 extern int maxBaseValue;
 
+/*****************************************************
+ * Function to insert digit
+ *****************************************************/
 Digit *addDigit(Digit *head, char ch, char *location){
 	Digit *digit = (Digit*)malloc(sizeof(Digit));
+
+	if(!digit){
+		printf("ERROR: Failed to allocate memory for digit");
+		exit(0);
+	}
+
 	digit->digitVal = ch;
 	digit->next = NULL;
 
@@ -32,6 +41,10 @@ Digit *addDigit(Digit *head, char ch, char *location){
 	return head;
 }
 
+
+/*****************************************************
+ * Function to delete digit
+******************************************************/
 Digit *deleteDigit(Digit *head){
 	if(!head)
 		return head;
@@ -44,6 +57,37 @@ Digit *deleteDigit(Digit *head){
 	return head;
 }
 
+/**************************************************
+ * Function to deallocate memory space
+ * associated with a given number
+***************************************************/
+void deallocateNumber(Number n){
+
+	Digit *head = n.sequenceHeader;
+	while(head){
+		head = deleteDigit(head);
+	}
+}
+
+
+/****************************************************
+ * Function to pad zeroes at the
+ * front of a digit sequence
+*****************************************************/
+Digit *zeroPadding(Digit *header, int num_zeroes){
+	while(num_zeroes > 0){
+		header = addDigit(header, '0', "begin");
+		num_zeroes--;
+	}
+
+	return header;
+}
+
+
+/***************************************************
+ * Function to convert a number
+ * to a given base
+****************************************************/
 Number convert(Number n, int to_base){
 	int base10Sequence = 0;
 
@@ -51,7 +95,7 @@ Number convert(Number n, int to_base){
 
 	// Convert to base 10
 	int count = n.digitCount - 1;
-	int base = 10;
+	int base = n.base;
 
 	Digit *tmp = n.sequenceHeader;
 
@@ -98,6 +142,8 @@ Number convert(Number n, int to_base){
 			int r = temp % to_base;
 			digitLength++;
 			sequenceHeader = addDigit(sequenceHeader, baseTable->symbols[r], "begin");
+
+			temp /= to_base;
 		}
 
 		res.digitCount = digitLength;
@@ -107,6 +153,10 @@ Number convert(Number n, int to_base){
 	}
 }
 
+
+/***************************************************
+ * Function to create a number
+****************************************************/
 Number createNumber(char *number_format){
 	Number num;
 
@@ -139,6 +189,11 @@ Number createNumber(char *number_format){
 
 	char *ptr = tokens[1];
 	while(*ptr != '\0'){
+		if(*ptr >= baseTable->symbols[num.base]){
+			printf("ERROR: Digit %c not a part of base %d\n",*ptr,num.base);
+			deallocateNumber(num);
+			exit(0);
+		}
 		num.sequenceHeader = addDigit(num.sequenceHeader, *ptr, "end");
 		count++;
 		ptr++;
@@ -154,6 +209,10 @@ Number createNumber(char *number_format){
 	return num;
 }
 
+
+/***************************************************
+ * Function to print a number
+****************************************************/
 void printNumber(Number n){
 	Digit *tmp = n.sequenceHeader;
 
@@ -162,13 +221,180 @@ void printNumber(Number n){
 		
 		tmp = tmp->next;
 	}
-	printf("\n");
+	printf("(%d)\n",n.base);
+	deallocateNumber(n);
 }
 
-void deallocateNumber(Number n){
 
-	Digit *head = n.sequenceHeader;
-	while(head){
-		head = deleteDigit(head);
+/*************************************************
+ * Function to add two numbers
+**************************************************/
+Number add(Number a, Number b){
+
+	/*******************************************
+	 * Checking if their bases are equal or not
+	********************************************/
+	if(a.base == b.base){
+		int max_base = a.base;
+
+		// Check if their number of digits are equal or not 
+		if(a.digitCount > b.digitCount){
+			// Pad zeroes to the number having less digits
+			int lenDiff = a.digitCount - b.digitCount;
+			b.sequenceHeader = zeroPadding(b.sequenceHeader, lenDiff);
+			b.digitCount = b.digitCount + lenDiff;
+		}
+
+		else if(a.digitCount < b.digitCount){
+			// Pad zeroes to the number having less digits
+			int lenDiff = b.digitCount - a.digitCount;
+			a.sequenceHeader = zeroPadding(a.sequenceHeader, lenDiff);
+			a.digitCount = a.digitCount + lenDiff;
+		}
+
+		Number sum;
+		sum.base = max_base;
+		sum.sequenceHeader = NULL;
+		sum.digitCount = 0;
+
+		Digit *tail1 = NULL, *tail2 = NULL;
+		char sum_digit;
+		int carry = 0;
+		int digitCount = 0;
+
+		while(tail1 != a.sequenceHeader && tail2 != b.sequenceHeader){
+			Digit *t1 = a.sequenceHeader, *t2 = b.sequenceHeader;
+
+			while(t1->next != tail1 && t2->next != tail2){
+				t1 = t1->next;
+				t2 = t2->next;
+			}
+
+			sum_digit = baseTable->symbols[(lookup(t1->digitVal) + lookup(t2->digitVal) + carry)  % max_base];
+			sum.sequenceHeader = addDigit(sum.sequenceHeader, sum_digit, "begin");
+			carry = (lookup(t1->digitVal) + lookup(t2->digitVal) + carry)  / max_base;
+			digitCount++;
+
+			tail1 = t1;
+			tail2 = t2;
+		}
+
+		if(carry != 0){
+			sum.sequenceHeader = addDigit(sum.sequenceHeader, baseTable->symbols[carry], "begin");
+			digitCount++;
+		}
+
+		sum.digitCount = digitCount;
+
+		return sum;
 	}
+
+	else if(a.base > b.base){
+		int max_base = a.base;
+		Number b_converted = convert(b, max_base);
+
+		if(a.digitCount > b_converted.digitCount){
+			int lenDiff = a.digitCount - b_converted.digitCount;
+			b_converted.sequenceHeader = zeroPadding(b_converted.sequenceHeader, lenDiff);
+			b_converted.digitCount = b_converted.digitCount + lenDiff;
+		}
+
+		else if(a.digitCount < b_converted.digitCount){
+			int lenDiff = b_converted.digitCount - a.digitCount;
+			a.sequenceHeader = zeroPadding(a.sequenceHeader, lenDiff);
+			a.digitCount = a.digitCount + lenDiff;
+		}
+
+		Number sum;
+		sum.base = max_base;
+		sum.sequenceHeader = NULL;
+		sum.digitCount = 0;
+
+		Digit *tail1 = NULL, *tail2 = NULL;
+		char sum_digit;
+		int carry = 0;
+		int digitCount = 0;
+
+		while(tail1 != a.sequenceHeader && tail2 != b_converted.sequenceHeader){
+			Digit *t1 = a.sequenceHeader, *t2 = b_converted.sequenceHeader;
+
+			while(t1->next != tail1 && t2->next != tail2){
+				t1 = t1->next;
+				t2 = t2->next;
+			}
+
+			sum_digit = baseTable->symbols[(lookup(t1->digitVal) + lookup(t2->digitVal) + carry)  % max_base];
+			sum.sequenceHeader = addDigit(sum.sequenceHeader, sum_digit, "begin");
+			carry = (lookup(t1->digitVal) + lookup(t2->digitVal) + carry)  / max_base;
+			digitCount++;
+
+			tail1 = t1;
+			tail2 = t2;
+		}
+
+		if(carry != 0){
+			sum.sequenceHeader = addDigit(sum.sequenceHeader, baseTable->symbols[carry], "begin");
+			digitCount++;
+		}
+
+		sum.digitCount = digitCount;
+
+		deallocateNumber(b_converted);
+		return sum;
+	}
+
+	else{
+		int max_base = b.base;
+		Number a_converted = convert(a, max_base);
+
+		if(b.digitCount > a_converted.digitCount){
+			int lenDiff = b.digitCount - a_converted.digitCount;
+			a_converted.sequenceHeader = zeroPadding(a_converted.sequenceHeader, lenDiff);
+			a_converted.digitCount = a_converted.digitCount + lenDiff;
+		}
+
+		else if(b.digitCount < a_converted.digitCount){
+			int lenDiff = a_converted.digitCount - b.digitCount;
+			b.sequenceHeader = zeroPadding(b.sequenceHeader, lenDiff);
+			b.digitCount = b.digitCount + lenDiff;
+		}
+
+		Number sum;
+		sum.base = max_base;
+		sum.sequenceHeader = NULL;
+		sum.digitCount = 0;
+
+		Digit *tail1 = NULL, *tail2 = NULL;
+		char sum_digit;
+		int carry = 0;
+		int digitCount = 0;
+
+		while(tail1 != a_converted.sequenceHeader && tail2 != b.sequenceHeader){
+			Digit *t1 = a_converted.sequenceHeader, *t2 = b.sequenceHeader;
+
+			while(t1->next != tail1 && t2->next != tail2){
+				t1 = t1->next;
+				t2 = t2->next;
+			}
+
+			sum_digit = baseTable->symbols[(lookup(t1->digitVal) + lookup(t2->digitVal) + carry)  % max_base];
+			sum.sequenceHeader = addDigit(sum.sequenceHeader, sum_digit, "begin");
+			carry = (lookup(t1->digitVal) + lookup(t2->digitVal) + carry)  / max_base;
+			digitCount++;
+
+			tail1 = t1;
+			tail2 = t2;
+		}
+
+		if(carry != 0){
+			sum.sequenceHeader = addDigit(sum.sequenceHeader, baseTable->symbols[carry], "begin");
+			digitCount++;
+		}
+
+		sum.digitCount = digitCount;
+
+		deallocateNumber(a_converted);
+		return sum;
+	}
+
 }

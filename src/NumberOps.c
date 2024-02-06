@@ -221,8 +221,8 @@ void printNumber(Number n){
 		
 		tmp = tmp->next;
 	}
-	printf("(%d)\n",n.base);
-	deallocateNumber(n);
+	printf("(%d)",n.base);
+    deallocateNumber(n);
 }
 
 

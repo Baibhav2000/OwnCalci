@@ -398,3 +398,83 @@ Number add(Number a, Number b){
 	}
 
 }
+
+Number baseNComplement(Number n, int base){
+	Number baseOneDownComplement;
+	baseOneDownComplement.base = base;
+	baseOneDownComplement.sequenceHeader = NULL;
+	baseOneDownComplement.digitCount = n.digitCount;
+
+	Digit *tmp = n.sequenceHeader;
+	while(tmp){
+		char digitVal = baseTable->symbols[lookup(baseTable->symbols[base-1]) - lookup(tmp->digitVal)];
+		baseOneDownComplement.sequenceHeader = addDigit(baseOneDownComplement.sequenceHeader, digitVal, "end");
+		tmp = tmp->next;
+	}
+
+	Number one;
+	one.base = base;
+	one.sequenceHeader = NULL;
+	one.sequenceHeader = addDigit(one.sequenceHeader, baseTable->symbols[1], "end");
+	one.digitCount = 1;
+
+	Number BaseNComplement = add(baseOneDownComplement, one);
+
+	deallocateNumber(baseOneDownComplement);
+
+	return BaseNComplement;
+}
+
+Number subtract(Number a, Number b){
+
+	if(a.base > b.base){
+		Number b_converted = convert(b, a.base);
+
+		Number b_complement = baseNComplement(b_converted, a.base);
+
+		Number diff = add(a, b_complement);
+
+		// Ignoring the carry digit
+		diff.sequenceHeader = deleteDigit(diff.sequenceHeader); 
+		while(diff.sequenceHeader->digitVal == '0'){
+			diff.sequenceHeader = deleteDigit(diff.sequenceHeader);
+		}
+
+		deallocateNumber(b_complement);
+		deallocateNumber(b_converted);
+
+		return diff;
+	}
+	else if(a.base < b.base){
+		Number a_converted = convert(a, b.base);
+		Number b_complement = baseNComplement(b, b.base);
+
+		Number diff = add(a, b_complement);
+
+		// Ignoring the carry digit
+		diff.sequenceHeader = deleteDigit(diff.sequenceHeader); 
+		while(diff.sequenceHeader->digitVal == '0'){
+			diff.sequenceHeader = deleteDigit(diff.sequenceHeader);
+		}
+
+		deallocateNumber(a_converted);
+		deallocateNumber(b_complement);
+		return diff;
+	}
+
+	else{
+		Number b_complement = baseNComplement(b, b.base);
+
+		Number diff = add(a, b_complement);
+
+		// Ignoring the carry digit
+		diff.sequenceHeader = deleteDigit(diff.sequenceHeader); 
+		while(diff.sequenceHeader->digitVal == '0'){
+			diff.sequenceHeader = deleteDigit(diff.sequenceHeader);
+		}
+
+		deallocateNumber(b_complement);
+		return diff;
+	}
+
+}

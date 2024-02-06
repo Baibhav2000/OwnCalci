@@ -14,13 +14,15 @@ int main(){
 
 	maxBaseValue = initializeBase(baseFile);
 
-	Number num1 = createNumber("16 73");
-    Number num2 = createNumber("8 7");
+	Number num1 = createNumber("4 103");
+    Number num2 = createNumber("3 12");
     Number sum = add(num1, num2);
+    Number difference = subtract(num1, num2);
 
 	printNumber(num1);
 	printNumber(num2);
 	printNumber(sum);
+	printNumber(difference);
 
 	fclose(baseFile);
 	free(baseTable);
